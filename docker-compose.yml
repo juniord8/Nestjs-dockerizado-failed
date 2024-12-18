@@ -1,10 +1,41 @@
-version: '3'
+version: '3.8'
+
 services:
-  postgres:
-    image: 'postgres:9.6.1'
+  # API service (NestJS)
+  api:
+    container_name: nestjs_api
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
-      - '5432:5432'
+      - "3000:3000"
+    env_file:
+      - .env
+    networks:
+      - docker-network
+    depends_on:
+      - postgres
+
+  # PostgreSQL service
+  postgres:
+    container_name: postgres_db
+    image: postgres:13-alpine
     environment:
-      POSTGRES_USER: 'test'
-      POSTGRES_PASSWORD: 'test'
-      POSTGRES_DB: 'test'
+      POSTGRES_PASSWORD: examplepassword
+      POSTGRES_USER: exampleuser
+      POSTGRES_DB: exampledb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - docker-network
+    ports:
+      - "5432:5432"
+
+networks:
+  docker-network:
+
+volumes:
+  postgres_data:
